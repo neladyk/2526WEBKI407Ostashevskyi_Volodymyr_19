@@ -1,1 +1,4 @@
-# 2526WEBKI407Ostashevskyi_Volodymyr_19
+Lab 1: static Web-Server & LittleFS
+Hardware: ESP32 Dev Module, Internal Flash Memory.
+
+Libraries: WiFi.h, WebServer.h, LittleFS.h.
