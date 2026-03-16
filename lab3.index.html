@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HC-SR04 Monitor</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #f0f4f8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.container {
+  background: #ffffff;
+  padding: 20px 30px;
+  border-radius: 15px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+  text-align: center;
+}
+h1 { color: #2b6cb0; }
+canvas { margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>HC-SR04 Distance Monitor</h1>
+  <canvas id="distanceChart" width="400" height="200"></canvas>
+</div>
+
+<script>
+const socket = new WebSocket('ws://' + location.hostname + ':81');
+const ctx = document.getElementById('distanceChart').getContext('2d');
+
+const chart = new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels: [],
+    datasets: [{
+      label: 'Відстань (см)',
+      data: [],
+      borderColor: '#2b6cb0',
+      backgroundColor: 'rgba(43,108,176,0.2)',
+      fill: true,
+      tension: 0.3
+    }]
+  },
+  options: {
+    scales: {
+      x: { display: true },
+      y: { beginAtZero: true }
+    }
+  }
+});
+
+socket.onmessage = function(event){
+  const data = JSON.parse(event.data);
+  const now = new Date().toLocaleTimeString();
+
+  chart.data.labels.push(now);
+  chart.data.datasets[0].data.push(data.distance);
+
+  // Rolling window 20 точок
+  if(chart.data.labels.length > 20){
+    chart.data.labels.shift();
+    chart.data.datasets[0].data.shift();
+  }
+  chart.update('none');
+};
+</script>
+</body>
+</html>
